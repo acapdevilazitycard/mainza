@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="product_text" inherit_id="website_sale.product_custom_text" priority="50">
+        <xpath expr="//a[@href='/terms']/.." position="replace">
+            <p class="text-muted mb-0">
+                <a href="/terms" class="text-muted"><u>Términos y Condiciones</u></a><br/>
+                <t t-if="product.sale_delay">
+                    Envío: <t t-esc="product.sale_delay"/> días laborables
+                </t>
+            </p>
+        </xpath>
+    </template>
+</odoo>

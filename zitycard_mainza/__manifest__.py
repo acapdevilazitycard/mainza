@@ -8,10 +8,11 @@
     'company': 'Zitycard',
     'maintainer': 'Zitycard',
     'website': 'https://www.zitycard.com',
-    'depends': ['account', 'sale', 'stock'],
+    'depends': ['account', 'stock', 'website_sale'],
     'data': [
         'reports/report_deliveryslip.xml',
         'reports/report_stockpicking_operations.xml',
+        'views/product_template_views.xml'
     ],
 	'icon': '/zitycard_mainza/static/description/icon.png',
     'installable': True,
