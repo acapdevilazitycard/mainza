@@ -8,7 +8,11 @@
     'company': 'Zitycard',
     'maintainer': 'Zitycard',
     'website': 'https://www.zitycard.com',
-    'depends': ['account', 'stock', 'website_sale'],
+    'depends': [
+        'account',
+        'stock',
+        'website_sale',
+    ],
     'data': [
         'reports/report_deliveryslip.xml',
         'reports/report_stockpicking_operations.xml',
