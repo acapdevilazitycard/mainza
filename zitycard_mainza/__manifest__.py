@@ -12,6 +12,7 @@
         'account',
         'stock',
         'website_sale',
+        'website_sale_stock',
     ],
     'data': [
         'reports/report_deliveryslip.xml',
@@ -20,5 +21,10 @@
     ],
 	'icon': '/zitycard_mainza/static/description/icon.png',
     'installable': True,
+    'assets': {
+        'web.assets_frontend': [
+            'zitycard_mainza/static/src/**/*',
+        ],
+    },
 }
 

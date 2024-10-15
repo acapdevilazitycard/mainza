@@ -6,6 +6,7 @@ from odoo import api, fields, models, _
 class ProductProduct(models.Model):
     _inherit = "product.product"
 
+
     def get_product_multiline_description_sale(self):
         """ Compute a multiline description of this product, in the context of sales
                 (do not use for purchases or other display reasons that don't intend to use "description_sale").
@@ -17,4 +18,3 @@ class ProductProduct(models.Model):
             name += '\n' + self.description_sale
 
         return name
-

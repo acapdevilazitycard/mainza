@@ -1,13 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <template id="product_text" inherit_id="website_sale.product_custom_text" priority="50">
-        <xpath expr="//a[@href='/terms']/.." position="replace">
-            <p class="text-muted mb-0">
-                <a href="/terms" class="text-muted"><u>Términos y Condiciones</u></a><br/>
-                <t t-if="product.sale_delay">
-                    Envío: <t t-esc="product.sale_delay"/> días laborables
-                </t>
-            </p>
-        </xpath>
-    </template>
+    <data>
+        <template id="product_text" inherit_id="website_sale.product_custom_text" priority="50">
+            <!-- reemplaza sale_delay siempre para mostrar el de la carpeta src/xml -->
+            <xpath expr="//a[@href='/terms']/.." position="replace">
+                <p class="text-muted mb-0">
+                    <a href="/terms" class="text-muted">
+                        <u>Términos y Condiciones</u>
+                    </a>
+                    <br/>
+                    <t t-if="product_variant.free_qty">
+                        <t t-esc="''"/>
+                    </t>
+                    <t t-else="">
+                        <t t-esc="''"/>
+                    </t>
+                </p>
+            </xpath>
+        </template>
+        <!-- columna precio con descuento en ficha del producto > compra -->
+        <record id="product_supplierinfo_tree_view_inherit" model="ir.ui.view">
+            <field name="name">product.supplierinfo.tree.view.inherit</field>
+            <field name="model">product.supplierinfo</field>
+            <field name="inherit_id" ref="product.product_supplierinfo_tree_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='discount']" position="after">
+                    <field name="discount_price" string='Precio con descuento' optional="show"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
 </odoo>
