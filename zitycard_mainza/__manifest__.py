@@ -17,7 +17,8 @@
     'data': [
         'reports/report_deliveryslip.xml',
         'reports/report_stockpicking_operations.xml',
-        'views/product_template_views.xml'
+        'views/product_template_views.xml',
+        'views/portal/product_template_portal_views.xml',
     ],
 	'icon': '/zitycard_mainza/static/description/icon.png',
     'installable': True,

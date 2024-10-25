@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="products_attributes_inherit" inherit_id="website_sale.products_attributes">
+        <xpath expr="//input[@name='order']" position="after">
+            <t t-set="attribute_visible_ids" t-value="search_product.attribute_line_ids.value_ids.ids"/>
+        </xpath>
+        <xpath expr="//select[@name='attrib']" position="replace">
+            <select class="form-select css_attribute_select mb-2" name="attrib">
+                <option value="" selected="true">-</option>
+                <t t-foreach="a.value_ids" t-as="v">
+                    <t t-if="v.id in attribute_visible_ids">
+                        <option t-att-value="'%s-%s' % (a.id,v.id)" t-esc="v.name" t-att-selected="v.id in attrib_set" />
+                    </t>
+                </t>
+            </select>
+        </xpath>
+        <xpath expr="//input[@name='attrib']/.." position="replace">
+            <t t-if="v.id in attribute_visible_ids">
+                <div class="form-check mb-1">
+                    <input type="checkbox"
+                           name="attrib"
+                           class="form-check-input"
+                           t-att-id="'%s-%s' % (a.id,v.id)"
+                           t-att-value="'%s-%s' % (a.id,v.id)"
+                           t-att-checked="'checked' if v.id in attrib_set else None"/>
+                    <label class="form-check-label fw-normal"
+                           t-att-for="'%s-%s' % (a.id,v.id)" t-field="v.name"/>
+                </div>
+            </t>
+        </xpath>
+    </template>
+</odoo>
