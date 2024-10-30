@@ -11,7 +11,6 @@
     'depends': [
         'account',
         'stock',
-        'website_sale',
         'website_sale_stock',
     ],
     'data': [
