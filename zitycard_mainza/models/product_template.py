@@ -17,9 +17,11 @@ class ProductTemplate(models.Model):
             product = product_or_template
             res.update({
                 'sale_delay': product.sale_delay,
+                'available_threshold': product.available_threshold,
             })
         else:
             res.update({
                 'sale_delay': "",
+                'available_threshold': 0,
             })
         return res

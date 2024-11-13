@@ -10,6 +10,7 @@
     'website': 'https://www.zitycard.com',
     'depends': [
         'account',
+        'stock',
         'website_sale_stock',
         'purchase'
     ],
