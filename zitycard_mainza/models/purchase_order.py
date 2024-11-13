@@ -1,8 +1,4 @@
-# Part of Odoo. See LICENSE file for full copyright and licensing details.
-
-from odoo import fields, models
-from odoo.http import request
-from odoo.tools.translate import html_translate
+from odoo import models
 
 
 class PurchaseOrder(models.Model):

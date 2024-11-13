@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from datetime import date
 
-from odoo import api, fields, models, _
+from odoo import api, models, _
 
 
 class AccountMoveLine(models.Model):
@@ -36,4 +36,3 @@ class AccountMoveLine(models.Model):
                 if product.description_purchase:
                     values.append(product.description_purchase)
             line.name = '\n'.join(values)
-

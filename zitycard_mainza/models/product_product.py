@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
-from datetime import date
+from odoo import models
 
-from odoo import api, fields, models, _
 
 class ProductProduct(models.Model):
     _inherit = "product.product"
-
 
     def get_product_multiline_description_sale(self):
         """ Compute a multiline description of this product, in the context of sales
