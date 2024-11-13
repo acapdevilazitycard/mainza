@@ -10,9 +10,8 @@
     'website': 'https://www.zitycard.com',
     'depends': [
         'account',
-        'stock',
-        'website_sale',
         'website_sale_stock',
+        'purchase'
     ],
     'data': [
         'reports/report_deliveryslip.xml',

@@ -5,21 +5,13 @@ from odoo.http import request
 from odoo.tools.translate import html_translate
 
 
-class ProductTemplate(models.Model):
-    _inherit = 'product.template'
+class PurchaseOrder(models.Model):
+    _inherit = 'purchase.order'
 
-    def _get_additionnal_combination_info(self, product_or_template, quantity, date, website):
-        res = super()._get_additionnal_combination_info(product_or_template, quantity, date, website)
-
-        product_or_template = product_or_template.sudo()
-
-        if product_or_template.is_product_variant:
-            product = product_or_template
-            res.update({
-                'sale_delay': product.sale_delay,
-            })
-        else:
-            res.update({
-                'sale_delay': "",
-            })
+    def button_confirm(self):
+        res = super().button_confirm()
+        for order in self:
+            for purchase_order_line_id in order.order_line:
+                if purchase_order_line_id.product_id and purchase_order_line_id.product_id.standard_price != purchase_order_line_id.price_unit:
+                    purchase_order_line_id.product_id.standard_price = purchase_order_line_id.price_unit
         return res
