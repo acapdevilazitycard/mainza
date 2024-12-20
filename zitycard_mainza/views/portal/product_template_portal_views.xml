@@ -1,31 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <template id="products_attributes_inherit" inherit_id="website_sale.products_attributes">
-        <xpath expr="//input[@name='order']" position="after">
-            <t t-set="attribute_visible_ids" t-value="search_product.attribute_line_ids.value_ids.ids"/>
-        </xpath>
-        <xpath expr="//select[@name='attrib']" position="replace">
-            <select class="form-select css_attribute_select mb-2" name="attrib">
-                <option value="" selected="true">-</option>
-                <t t-foreach="a.value_ids" t-as="v">
-                    <t t-if="v.id in attribute_visible_ids">
-                        <option t-att-value="'%s-%s' % (a.id,v.id)" t-esc="v.name" t-att-selected="v.id in attrib_set" />
-                    </t>
+        <xpath expr="//t[@t-foreach='attributes']" position="replace">
+            <t t-foreach="attributes" t-as="a">
+                <t t-set="visible_values"
+                   t-value="a.value_ids.filtered(lambda l: l.id in search_product.mapped('attribute_line_ids').mapped('value_ids').ids)"/>
+                <t t-if="visible_values">
+                    <div class="accordion-item nav-item mb-1 border-0"
+                         t-if="a.value_ids and len(visible_values) &gt; 0">
+                        <h6 class="mb-3">
+                            <b class="o_products_attributes_title d-none d-lg-block" t-field="a.name"/>
+                        </h6>
+                        <div t-attf-id="o_products_attributes_{{a.id}}" class="">
+                            <t t-if="a.display_type == 'select'">
+                                <select class="form-select css_attribute_select mb-2" name="attrib">
+                                    <option value="" selected="true">-</option>
+                                    <t t-foreach="visible_values" t-as="v">
+                                        <option t-att-value="'%s-%s' % (a.id, v.id)" t-esc="v.name"
+                                                t-att-selected="v.id in attrib_set"/>
+                                    </t>
+                                </select>
+                            </t>
+                            <div t-elif="a.display_type == 'color'" class="mb-3">
+                                <t t-call="website_sale.o_wsale_offcanvas_color_attribute"/>
+                            </div>
+                            <div t-elif="a.display_type in ('radio', 'pills', 'multi')" class="flex-column mb-3">
+                                <t t-foreach="visible_values" t-as="v">
+                                    <div class="form-check mb-1">
+                                        <input type="checkbox" name="attrib" class="form-check-input"
+                                               t-att-id="'%s-%s' % (a.id, v.id)" t-att-value="'%s-%s' % (a.id, v.id)"
+                                               t-att-checked="'checked' if v.id in attrib_set else None"/>
+                                        <label class="form-check-label fw-normal" t-att-for="'%s-%s' % (a.id, v.id)"
+                                               t-field="v.name"/>
+                                    </div>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
                 </t>
-            </select>
-        </xpath>
-        <xpath expr="//input[@name='attrib']/.." position="replace">
-            <t t-if="v.id in attribute_visible_ids">
-                <div class="form-check mb-1">
-                    <input type="checkbox"
-                           name="attrib"
-                           class="form-check-input"
-                           t-att-id="'%s-%s' % (a.id,v.id)"
-                           t-att-value="'%s-%s' % (a.id,v.id)"
-                           t-att-checked="'checked' if v.id in attrib_set else None"/>
-                    <label class="form-check-label fw-normal"
-                           t-att-for="'%s-%s' % (a.id,v.id)" t-field="v.name"/>
-                </div>
             </t>
         </xpath>
     </template>
