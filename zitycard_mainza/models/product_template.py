@@ -1,4 +1,4 @@
-from odoo import fields, models
+from odoo import api, fields, models
 
 
 class ProductTemplate(models.Model):
@@ -21,3 +21,10 @@ class ProductTemplate(models.Model):
                 'available_threshold': 0,
             })
         return res
+
+    has_free_qty = fields.Boolean(string='Has Free Quantity', compute='_compute_has_free_qty', store=True)
+
+    @api.depends('product_variant_ids.free_qty')
+    def _compute_has_free_qty(self):
+        for product in self:
+            product.has_free_qty = any(variant.free_qty > 0 for variant in product.product_variant_ids)
