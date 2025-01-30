@@ -27,8 +27,8 @@ class ImportImage(models.TransientModel):
         ('product.template', "Product Template"),
     ], help="Modelo para la importación", string="Modelo de importación",
         default='product.template')
-    split = fields.Char(string='Separador')
-    field_name = fields.Char(string='Nombre del campo de la imagen')
+    split = fields.Char(string='Separador', default='_')
+    field_name = fields.Char(string='Nombre del campo de la imagen', default='image_1920')
 
     def _get_vals(self, search_value, search_by):
         search_vals = search_value.split(self.split) if self.split else [search_value]
@@ -65,7 +65,8 @@ class ImportImage(models.TransientModel):
 
                 if product_tmpl_ids:
                     _logger.warning("PRODUCTOS: %s", len(product_tmpl_ids))
-                    domain.append(('product_tmpl_id', 'in', product_tmpl_ids.ids))
+                    return product_tmpl_ids
+                    # domain.append(('product_tmpl_id', 'in', product_tmpl_ids.ids))
 
             if domain:
                 products = self.env['product.product'].search(domain)
