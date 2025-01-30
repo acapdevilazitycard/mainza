@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <template id="report_saleorder_document_inherit" inherit_id="sale.report_saleorder_document">
+        <xpath expr="//span[@t-field='line.product_uom']" position="replace"/>
+        <xpath expr="//th[@name='th_taxes']" position="replace"/>
+        <xpath expr="//td[@name='td_taxes']" position="replace"/>
+        <xpath expr="//span[@t-field='doc.note']/.." position="replace"/>
+        <xpath expr="//div[@t-if='doc.client_order_ref']/strong" position="replace">
+            <strong>Referencia</strong>
+        </xpath>
+        <xpath expr="//div[@t-if='doc.user_id.name']/strong" position="replace">
+            <strong>Comercial</strong>
+        </xpath>
+    </template>
+</odoo>

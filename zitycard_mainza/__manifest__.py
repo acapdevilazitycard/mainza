@@ -18,6 +18,8 @@
     'data': [
         'reports/report_deliveryslip.xml',
         'reports/report_stockpicking_operations.xml',
+        'reports/sale_order_reports.xml',
+        'reports/account_move_reports.xml',
         'views/product_template_views.xml',
         'views/sale_order_views.xml',
         'views/portal/product_template_portal_views.xml',
