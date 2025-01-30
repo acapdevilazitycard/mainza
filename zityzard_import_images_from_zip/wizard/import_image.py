@@ -55,6 +55,8 @@ class ImportImage(models.TransientModel):
 
                 if not attr_value:
                     continue
+                else:
+                    _logger.warning("ATTRIBUTE: %s", attr_value)
 
                 product_tmpl_ids = self.env['product.template.attribute.value'].search([
                     ('attribute_id', '=', attribute.id),
@@ -62,6 +64,7 @@ class ImportImage(models.TransientModel):
                 ]).mapped('product_tmpl_id')
 
                 if product_tmpl_ids:
+                    _logger.warning("PRODUCTOS: %s", len(product_tmpl_ids))
                     domain.append(('product_tmpl_id', 'in', product_tmpl_ids.ids))
 
             if domain:
