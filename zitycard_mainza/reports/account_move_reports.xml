@@ -3,6 +3,6 @@
     <template id="report_invoice_document_inherit" inherit_id="account.report_invoice_document">
         <xpath expr="//th[@name='th_taxes']" position="replace"/>
         <xpath expr="//td[@name='td_taxes']" position="replace"/>
-        <xpath expr="//span[@t-field='doc.narration']/.." position="replace"/>
+        <xpath expr="//span[@t-field='o.narration']/.." position="replace"/>
     </template>
 </odoo>
