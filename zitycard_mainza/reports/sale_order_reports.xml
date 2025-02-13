@@ -11,5 +11,11 @@
         <xpath expr="//div[@t-if='doc.user_id.name']/strong" position="replace">
             <strong>Comercial</strong>
         </xpath>
+        <xpath expr="//span[@t-field='doc.name']/../span[1]" position="replace">
+            <span t-if="env.context.get('proforma', False) or is_pro_forma">Factura proforma</span>
+        </xpath>
+        <th name="th_priceunit" position="replace">
+            <th name="th_priceunit" class="text-end">Precio</th>
+        </th>
     </template>
 </odoo>

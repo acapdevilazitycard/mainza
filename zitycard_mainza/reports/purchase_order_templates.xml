@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <template id="purchase_order_report_inherit" inherit_id="purchase.report_purchaseorder_document">
+        <p t-field="o.date_approve" position="replace">
+            <p t-field="o.date_approve" class="m-0" t-options="{'widget': 'date', 'format': 'dd/MM/YYYY'}"/>
+        </p>
+        <p t-field="o.date_order" position="replace">
+            <p t-field="o.date_order" class="m-0" t-options="{'widget': 'date', 'format': 'dd/MM/YYYY'}"/>
+        </p>
+        <span t-field="line.date_planned" position="replace">
+            <span t-field="line.date_planned" t-options="{'widget': 'date', 'format': 'dd/MM/YYYY'}"/>
+        </span>
+        <span t-field="line.product_uom.name" position="replace"/>
+        <th name="th_price_unit" position="after">
+            <th name="th_discount" class="text-end"><strong>Descuento</strong></th>
+        </th>
+        <th name="th_price_unit" position="replace">
+            <th name="th_price_unit" class="text-end"><strong>Precio</strong></th>
+        </th>
+        <xpath expr="//span[@t-field='line.price_unit']/.." position="after">
+            <td class="text-end">
+                <span t-if="line.discount">
+                    <span t-field="line.discount"/>%
+                </span>
+            </td>
+        </xpath>
+    </template>
+</odoo>
