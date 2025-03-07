@@ -4,6 +4,16 @@
         <xpath expr="//span[@t-field='move.product_id']" position="replace">
             <span t-field="move.product_id.name">Customizable Desk</span>
         </xpath>
+
+        <xpath expr="//th[@name='th_sm_product']/strong" position="replace">
+         <t t-if="o.picking_type_id.code=='outgoing'">
+         <strong>DESCRIPCIÓN</strong>
+        </t>
+         <t t-else="">
+             <strong>PRODUCTO</strong>
+         </t>
+        </xpath>
+
     </template>
     <template id="stock_report_delivery_aggregated_move_lines_inherit" inherit_id="stock.stock_report_delivery_aggregated_move_lines">
         <xpath expr="//tr[@t-foreach='aggregated_lines']/td[1]/span" position="replace">
