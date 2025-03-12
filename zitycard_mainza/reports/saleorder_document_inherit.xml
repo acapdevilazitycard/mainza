@@ -1,0 +1,9 @@
+<odoo>
+    <template id="sale_order_document_inherit" inherit_id="sale.report_saleorder_document">
+
+        <xpath expr="//h2[@class='mt-4']/span[3]" position="replace">
+            <span t-else="">ALBARÁN</span>
+        </xpath>
+
+    </template>
+</odoo>
