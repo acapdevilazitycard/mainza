@@ -38,6 +38,7 @@ class ImportImage(models.TransientModel):
                 return False
 
             domain = []
+            productos_totales = self.env['product.template'].browse([])
             attr_count = len(search_vals) // 2
 
             for i in range(0, len(search_vals), 2):
@@ -65,9 +66,11 @@ class ImportImage(models.TransientModel):
 
                 if product_tmpl_ids:
                     _logger.warning("PRODUCTOS: %s", len(product_tmpl_ids))
-                    return product_tmpl_ids
+                    # return product_tmpl_ids
+                    productos_totales |= product_tmpl_ids
                     # domain.append(('product_tmpl_id', 'in', product_tmpl_ids.ids))
-
+            if productos_totales:
+                return productos_totales
             if domain:
                 products = self.env['product.product'].search(domain)
                 final_products = self.env['product.product']
