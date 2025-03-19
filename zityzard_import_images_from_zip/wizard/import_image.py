@@ -38,7 +38,7 @@ class ImportImage(models.TransientModel):
                 return False
 
             domain = []
-            productos_totales = self.env['product.template'].browse([])
+            productos_totales = None # Inicializar variable para intersección de productos
             attr_count = len(search_vals) // 2
 
             for i in range(0, len(search_vals), 2):
@@ -56,8 +56,8 @@ class ImportImage(models.TransientModel):
 
                 if not attr_value:
                     continue
-                else:
-                    _logger.warning("ATTRIBUTE: %s", attr_value)
+
+                _logger.warning("ATTRIBUTE: %s", attr_value)
 
                 product_tmpl_ids = self.env['product.template.attribute.value'].search([
                     ('attribute_id', '=', attribute.id),
@@ -66,21 +66,16 @@ class ImportImage(models.TransientModel):
 
                 if product_tmpl_ids:
                     _logger.warning("PRODUCTOS: %s", len(product_tmpl_ids))
-                    # return product_tmpl_ids
-                    productos_totales |= product_tmpl_ids
-                    # domain.append(('product_tmpl_id', 'in', product_tmpl_ids.ids))
-            if productos_totales:
-                return productos_totales
-            if domain:
-                products = self.env['product.product'].search(domain)
-                final_products = self.env['product.product']
 
-                for product in products:
-                    if len(product.product_template_attribute_value_ids) == attr_count:
-                        final_products |= product
+                    if productos_totales is None:
+                        productos_totales = product_tmpl_ids
+                    else:
+                        productos_totales &= product_tmpl_ids  # Intersección
 
-                return final_products if final_products else False
-            return False
+                    if not productos_totales:
+                        return False  # Si en algún punto no hay coincidencias, no hay resultados posibles
+
+            return productos_totales if productos_totales else False
 
         elif len(search_vals) == 2 and search_by == 'category':
             parent_category = self.env['product.category'].search([('name', '=', search_vals[0])], limit=1)

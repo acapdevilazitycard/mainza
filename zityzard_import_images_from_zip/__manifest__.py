@@ -13,5 +13,5 @@
         'security/ir.model.access.csv',
         'wizard/import_image.xml',
     ],
-	'icon': '/zitycard_import_base/static/description/icon.png',
+	'icon': '/zitycard_import_images_from_zip/static/description/icon.png',
 }
