@@ -16,6 +16,7 @@
         'sale',
     ],
     'data': [
+        'reports/external_layout.xml',
         'reports/report_deliveryslip.xml',
         'reports/report_stockpicking_operations.xml',
         'reports/sale_order_reports.xml',
