@@ -14,11 +14,12 @@
         'website_sale_stock',
     ],
     'data': [
+        'reports/external_layout_report.xml',
         'reports/report_deliveryslip.xml',
         'reports/report_stockpicking_operations.xml',
         'views/product_template_views.xml'
     ],
-	'icon': '/zitycard_mainza/static/description/icon.png',
+        'icon': '/zitycard_mainza/static/description/icon.png',
     'installable': True,
     'assets': {
         'web.assets_frontend': [

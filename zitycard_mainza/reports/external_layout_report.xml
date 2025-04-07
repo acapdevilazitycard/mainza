@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="external_layout_boxed_inherit" inherit_id="web.external_layout_boxed">
+        <xpath expr="//div[@t-attf-class='footer o_boxed_footer o_company_#{company.id}_layout']" position="replace">
+            <div t-attf-class="footer o_boxed_footer o_company_#{company.id}_layout" style="font-size: 0.8em; line-height: 1.2;">
+                <div style="width: 100%; text-align: center;" t-if="report_type == 'pdf'">
+                    Page: <span class="page"/> / <span class="topage"/>
+                </div>
+
+                <div class="last-page" style="width: 100%; max-width: 100%;">
+                    <div style="width: 100%; white-space: normal;">
+                        Informarle que tratamos la información que nos facilita con el fin de realizar pedidos y gestionar la facturación de los productos y servicios contratados.
+                        Puede consultar toda la información sobre el tratamiento de sus datos y los derechos que le asisten en la Política de Privacidad de nuestra web
+                        <a href="http://www.variadores.es" target="_blank">www.variadores.es</a>
+                        <br/>
+                        Inscrita en el R.M. de Zaragoza, Tomo 4253, Folio 32, Hoja: Z 62027, Insc. 1
+                    </div>
+                    <div t-if="report_type == 'pdf' and display_name_in_footer" class="text-muted" style="width: 100%;">
+                        <span t-out="o.name">(document name)</span>
+                    </div>
+                </div>
+            </div>
+        </xpath>
+    </template>
+</odoo>
