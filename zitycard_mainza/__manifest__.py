@@ -10,10 +10,9 @@
     'website': 'https://www.zitycard.com',
     'depends': [
         'account',
-        'stock',
         'website_sale_stock',
         'purchase',
-        'sale',
+        'report_qweb_element_page_visibility',
     ],
     'data': [
         'reports/external_layout.xml',

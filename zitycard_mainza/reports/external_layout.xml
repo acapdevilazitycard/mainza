@@ -12,7 +12,6 @@
                         Informarle que tratamos la información que nos facilita con el fin de realizar pedidos y gestionar la facturación de los productos y servicios contratados.
                         Puede consultar toda la información sobre el tratamiento de sus datos y los derechos que le asisten en la Política de Privacidad de nuestra web
                         <a href="http://www.variadores.es" target="_blank">www.variadores.es</a>
-                        <br/>
                         Inscrita en el R.M. de Zaragoza, Tomo 4253, Folio 32, Hoja: Z 62027, Insc. 1
                     </div>
                     <div t-if="report_type == 'pdf' and display_name_in_footer" class="text-muted" style="width: 100%;">
