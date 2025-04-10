@@ -9,6 +9,7 @@
     'maintainer': 'Zitycard',
     'website': 'https://www.zitycard.com',
     'depends': [
+        'sale_management',
         'account',
         'website_sale_stock',
         'purchase',
