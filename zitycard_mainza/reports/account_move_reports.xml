@@ -6,4 +6,25 @@
         <xpath expr="//span[@t-field='o.narration']/.." position="replace"/>
         <xpath expr="//span[@t-field='line.product_uom_id']" position="replace"/>
     </template>
+
+    <template id="report_account_invoice_grouped_inherit" inherit_id="account_invoice_report_grouped_by_picking.report_invoice_document">
+        <xpath expr="//tr[@t-if='picking']/td[@colspan='10']/strong" position="replace">
+            <strong>
+                <span>Fecha:</span>
+                <span
+                        t-field="picking.date_done"
+                        t-options="{'widget': 'date'}"
+                />
+                <span>Albarán:</span>
+                <span t-field="picking.name" />
+                <span>Pedido:</span>
+                <span t-field="picking.sale_id.name" />
+                <t t-if="picking.sale_id.client_order_ref">
+                    <span t-translation="off"> (</span>
+                    <span t-field="picking.sale_id.client_order_ref" />
+                    <span t-translation="off">)</span>
+                </t>
+            </strong>
+        </xpath>
+    </template>
 </odoo>

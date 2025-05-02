@@ -14,6 +14,7 @@
         'website_sale_stock',
         'purchase',
         'report_qweb_element_page_visibility',
+        'account_invoice_report_grouped_by_picking',
     ],
     'data': [
         'reports/external_layout.xml',
