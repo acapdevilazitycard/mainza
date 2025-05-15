@@ -8,7 +8,18 @@
     </template>
 
     <template id="report_account_invoice_grouped_inherit" inherit_id="account_invoice_report_grouped_by_picking.report_invoice_document">
-        <xpath expr="//tr[@t-if='picking']/td[@colspan='10']/strong" position="replace">
+
+        <xpath expr="//tr[@t-if='picking']/td[@colspan='10']" position="attributes">
+            <attribute name="colspan">1</attribute>
+        </xpath>
+        <xpath expr="//tr[@t-if='picking']" position="inside">
+            <td></td>
+            <td></td>
+            <td></td>
+        </xpath>
+        <!--
+        <xpath expr="//tr[@t-if='picking']/td[@colspan='10']/strong" position="replace"> -->
+        <xpath expr="//tr[@t-if='picking']/td/strong" position="replace">
             <strong>
                 <span>Fecha:</span>
                 <span
@@ -17,8 +28,8 @@
                 />
                 <span>Albarán:</span>
                 <span t-field="picking.name" />
-                <span>Pedido:</span>
-                <span t-field="picking.sale_id.name" />
+                <span>Referencia:</span>
+                <span t-field="o.ref" />
                 <t t-if="picking.sale_id.client_order_ref">
                     <span t-translation="off"> (</span>
                     <span t-field="picking.sale_id.client_order_ref" />
@@ -26,5 +37,9 @@
                 </t>
             </strong>
         </xpath>
+
+        <xpath expr="//tr[@t-else]" position="replace" />
+        <xpath expr="//td[@class='text-right']/.." position="replace" />
+
     </template>
 </odoo>
