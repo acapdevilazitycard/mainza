@@ -26,6 +26,7 @@
         'views/product_template_views.xml',
         'views/sale_order_views.xml',
         'views/portal/product_template_portal_views.xml',
+        'views/stock_picking_views.xml',
     ],
 	'icon': '/zitycard_mainza/static/description/icon.png',
     'installable': True,
