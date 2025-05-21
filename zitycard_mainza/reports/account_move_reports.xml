@@ -13,9 +13,10 @@
             <attribute name="colspan">1</attribute>
         </xpath>
         <xpath expr="//tr[@t-if='picking']" position="inside">
-            <td></td>
-            <td></td>
-            <td></td>
+                <td t-if="display_discount" />
+                <td />
+                <td />
+                <td />
         </xpath>
         <!--
         <xpath expr="//tr[@t-if='picking']/td[@colspan='10']/strong" position="replace"> -->

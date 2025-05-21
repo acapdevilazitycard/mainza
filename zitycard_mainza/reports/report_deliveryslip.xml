@@ -23,7 +23,7 @@
         <xpath expr="//div[@t-if='o.state']" position="replace">
                 <div t-if="o.state" class="col-auto col-3 mw-100 mb-2"  name="div_sched_date">
                 <strong>Fecha de envío:</strong>
-                <p t-if="o.state == 'done'" t-field="o.date_done" class="m-0"/>
+                <p t-if="o.state == 'done'" t-field="o.date_done" t-options="{'widget': 'date'}" class="m-0"/>
                 <p t-else="" t-field="o.scheduled_date" t-options="{'widget': 'date'}" class="m-0"/>
             </div>
         </xpath>
