@@ -22,19 +22,17 @@
         <xpath expr="//tr[@t-if='picking']/td[@colspan='10']/strong" position="replace"> -->
         <xpath expr="//tr[@t-if='picking']/td/strong" position="replace">
             <strong>
-                <span>Fecha:</span>
                 <span
                         t-field="picking.date_done"
                         t-options="{'widget': 'date'}"
                 />
-                <span>Albarán:</span>
+                <span>|</span>
                 <span t-field="picking.name" />
-                <span>Referencia:</span>
+                <span>|</span>
+                    <span t-field="picking.sale_id.name" />
+                <t t-if="o.ref">
+                    <span>|</span>
                 <span t-field="o.ref" />
-                <t t-if="picking.sale_id.client_order_ref">
-                    <span t-translation="off"> (</span>
-                    <span t-field="picking.sale_id.client_order_ref" />
-                    <span t-translation="off">)</span>
                 </t>
             </strong>
         </xpath>
