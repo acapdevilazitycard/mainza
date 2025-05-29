@@ -12,33 +12,97 @@
         <xpath expr="//tr[@t-if='picking']/td[@colspan='10']" position="attributes">
             <attribute name="colspan">1</attribute>
         </xpath>
+
         <xpath expr="//tr[@t-if='picking']" position="inside">
                 <td t-if="display_discount" />
                 <td />
                 <td />
                 <td />
         </xpath>
-        <!--
-        <xpath expr="//tr[@t-if='picking']/td[@colspan='10']/strong" position="replace"> -->
-        <xpath expr="//tr[@t-if='picking']/td/strong" position="replace">
-            <strong>
-                <span
-                        t-field="picking.date_done"
-                        t-options="{'widget': 'date'}"
-                />
-                <span>|</span>
-                <span t-field="picking.name" />
-                <span>|</span>
-                    <span t-field="picking.sale_id.name" />
-                <t t-if="o.ref">
-                    <span>|</span>
-                <span t-field="o.ref" />
-                </t>
-            </strong>
+
+        <xpath expr="//tr[@t-else='']" position="replace" />
+        <xpath expr="//td[@class='text-right']/.." position="replace" />
+
+
+        <!-- Inicializar variables para la nueva lógica de grupo -->
+        <xpath expr="//t[@t-set='last_picking']" position="before">
+            <!-- last_picking ya es seteado por el módulo base -->
+            <t t-set="current_report_group_by" t-value="None"/>
+            <t t-set="current_report_picking" t-value="None"/>
+            <t t-set="current_report_sale_order" t-value="None"/>
         </xpath>
 
-        <xpath expr="//tr[@t-else]" position="replace" />
-        <xpath expr="//td[@class='text-right']/.." position="replace" />
+        <!-- Reemplazamos la lógica de impresión de cabecera del módulo base -->
+        <xpath expr="//t[@t-foreach='lines_grouped']/t[@t-if='picking != last_picking']" position="replace">
+            <!-- 'lines_group' es el diccionario del bucle principal. Ahora tiene:
+                 group_by, picking, sale_order, line, quantity -->
+            <t t-set="data" t-value="lines_group"/> <!-- lines_group es el iterador del bucle del módulo base -->
+
+            <t t-set="show_header" t-value="False"/>
+
+            <t t-if="data['group_by'] == 'picking'">
+                <t t-if="data['picking'] != current_report_picking">
+                    <t t-set="show_header" t-value="True"/>
+                    <t t-set="current_report_picking" t-value="data['picking']"/>
+                    <t t-set="current_report_sale_order" t-value="None"/> <!-- Reset SO si cambiamos a picking -->
+                    <t t-set="current_report_group_by" t-value="'picking'"/>
+                </t>
+            </t>
+            <t t-elif="data['group_by'] == 'sale_order'">
+                <t t-if="data['sale_order'] != current_report_sale_order or current_report_group_by != 'sale_order'">
+                    <t t-set="show_header" t-value="True"/>
+                    <t t-set="current_report_picking" t-value="None"/>
+                    <t t-set="current_report_sale_order" t-value="data['sale_order']"/>
+                    <t t-set="current_report_group_by" t-value="'sale_order'"/>
+                </t>
+            </t>
+            <t t-elif="data['group_by'] == 'other'">
+                <t t-if="current_report_group_by != 'other'">
+                    <t t-set="show_header" t-value="True"/>
+                    <t t-set="current_report_picking" t-value="None"/>
+                    <t t-set="current_report_sale_order" t-value="None"/>
+                    <t t-set="current_report_group_by" t-value="'other'"/>
+                </t>
+            </t>
+
+            <t t-if="show_header">
+                <tr><!--
+                    <td t-att-colspan="o._get_report_line_colspan()">-->
+                    <td>
+                        <strong t-if="data['group_by'] == 'picking' and data['picking']">
+                            <span t-field="data['picking'].date_done" t-options="{'widget': 'date'}" t-if="data['picking'].date_done"/>
+                            <span t-elif="data['picking'].date" t-field="data['picking'].date" t-options="{'widget': 'date'}"/>
+                            <span t-else="" />
+                            | <span t-field="data['picking'].name"/>
+                            <t t-if="data['picking'].sale_id">
+                                | <span t-field="data['picking'].sale_id.name"/>
+                                <t t-if="data['picking'].sale_id.client_order_ref">
+                                    (<span t-esc="data['picking'].sale_id.client_order_ref"/>)
+                                </t>
+                            </t>
+                            <t t-if="o.ref">
+                                | <span t-field="o.ref"/>
+                            </t>
+                        </strong>
+                        <strong t-elif="data['group_by'] == 'sale_order' and data['sale_order']">
+
+                            <span t-field="data['sale_order'].date_order" t-options="{'widget': 'date'}"/>
+                            | <span t-field="data['sale_order'].name"/>
+                            <t t-if="data['sale_order'].client_order_ref">
+                                (<span t-esc="data['sale_order'].client_order_ref"/>)
+                            </t>
+                        </strong>
+                    </td>
+                        <td t-if="display_discount" />
+                        <td />
+                        <td />
+                        <td />
+                </tr>
+            </t>
+        </xpath>
+    <xpath expr="//t[@t-set='subtotal']" position="after">
+        <t t-set="last_sale_order" t-value="False" />
+    </xpath>
 
     </template>
 </odoo>
