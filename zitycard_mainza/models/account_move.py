@@ -1,7 +1,3 @@
-# Copyright 2017-2024 Tecnativa - Carlos Dauden
-# Copyright 2018 Tecnativa - David Vidal
-# Copyright 2018-2019 Tecnativa - Pedro M. Baeza
-# License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 from datetime import datetime
 
 from odoo import api, models
@@ -74,7 +70,7 @@ class AccountMove(models.Model):
                 target_dict.setdefault(key_for_section_note, 0.0)  # La cantidad es 0 para secciones/notas
 
     def _get_grouped_by_picking_sorted_lines(self):
-        """Sorts the invoice lines to be grouped by picking."""
+        """Sorts the invoicelines to be grouped by picking."""
         return self.invoice_line_ids.sorted(
             lambda ln: (-ln.sequence, ln.date, str(ln.move_name or ''), -ln.id), reverse=True
         )
