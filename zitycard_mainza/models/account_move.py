@@ -37,24 +37,10 @@ class AccountMove(models.Model):
             ),
         )
 
-    def _get_signed_quantity_done(self, invoice_line, move, sign):  # 'move' es un stock.move
-        """
-        Hook method. 'move' es un 'stock.move' record.
-        Calcula la cantidad 'hecha' sumando de las stock.move.line asociadas.
-        """
-        qty_actually_done = 0.0
-        # 'move.move_line_ids' es la relación One2many de stock.move a stock.move.line
-        for sml in move.move_line_ids.filtered(lambda l: l.state == 'done'):
-            sml_qty_done_field_name = 'quantity_done' if hasattr(sml, 'quantity_done') else 'qty_done'
+    def _get_quantity_from_move_for_picking(self, move, sign):
 
-            current_sml_qty = getattr(sml, sml_qty_done_field_name, 0.0)
-
-            if sml.location_id.usage == "customer":  # Retorno a la empresa desde el cliente
-                qty_actually_done -= current_sml_qty
-            elif sml.location_dest_id.usage == "customer":  # Entrega al cliente
-                qty_actually_done += current_sml_qty
-
-        return qty_actually_done * sign
+        #return move.quantity * sign
+        return move.product_uom_qty * sign
 
     def _process_section_note_lines_grouped(
             self, previous_section, previous_note, target_dict, group_key
@@ -128,11 +114,10 @@ class AccountMove(models.Model):
 
                         key = (current_picking, inv_line)
                         # Usamos la función _get_signed_quantity_done original que espera un stock.move
-                        qty = self._get_signed_quantity_done(inv_line, move, sign)
-                        picking_lines_data[key] = picking_lines_data.get(key, 0.0) + qty
 
-                        if move.location_id.usage == "customer":  # Del original
-                            has_returned_qty = True
+#
+                        qty = self._get_quantity_from_move_for_picking(move, sign)
+                        picking_lines_data[key] = picking_lines_data.get(key, 0.0) + qty
                         associated_to_picking_group = True
                     # else: el move no tiene picking_id, se ignora para el grupo de picking.
                     # Podría considerarse para SO si el move tiene SO y no picking.
@@ -189,17 +174,6 @@ class AccountMove(models.Model):
                 "picking": so_to_picking_map.get(so_record, no_picking_placeholder),
                 # Intenta encontrar un picking asociado
                 "sale_order": so_record,
-                "line": aml,
-                "quantity": qty,
-                "is_last_section_notes": False,
-            })
-
-        # Líneas "Otros"
-        for (group_key_none, aml), qty in other_lines_data.items():  # group_key_none es None
-            final_report_lines.append({
-                "group_by": "other",
-                "picking": no_picking_placeholder,
-                "sale_order": no_so_placeholder,
                 "line": aml,
                 "quantity": qty,
                 "is_last_section_notes": False,

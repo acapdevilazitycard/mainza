@@ -77,9 +77,6 @@
                             | <span t-field="data['picking'].name"/>
                             <t t-if="data['picking'].sale_id">
                                 | <span t-field="data['picking'].sale_id.name"/>
-                                <t t-if="data['picking'].sale_id.client_order_ref">
-                                    (<span t-esc="data['picking'].sale_id.client_order_ref"/>)
-                                </t>
                             </t>
                             <t t-if="o.ref">
                                 | <span t-field="o.ref"/>
@@ -89,8 +86,8 @@
 
                             <span t-field="data['sale_order'].date_order" t-options="{'widget': 'date'}"/>
                             | <span t-field="data['sale_order'].name"/>
-                            <t t-if="data['sale_order'].client_order_ref">
-                                (<span t-esc="data['sale_order'].client_order_ref"/>)
+                            <t t-if="o.ref">
+                                | <span t-field="o.ref"/>
                             </t>
                         </strong>
                     </td>
