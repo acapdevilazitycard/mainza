@@ -160,3 +160,13 @@ class AccountMove(models.Model):
             })
 
         return self._sort_grouped_lines_final(final_report_lines)
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        moves = super().create(vals_list)
+        for move in moves:
+            if move.ref and move.ref.startswith(', '):
+                new_ref = move.ref[2:]
+                move.write({'ref': new_ref})
+
+        return moves
