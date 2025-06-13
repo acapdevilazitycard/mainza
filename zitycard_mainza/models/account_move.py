@@ -47,7 +47,7 @@ class AccountMove(models.Model):
     ):
         """
         Procesa secciones y notas, añadiéndolas a un diccionario target_dict bajo una group_key.
-        group_key puede ser un picking_id, un sale_order_id, o un placeholder para "otros".
+        group_key puede ser un picking_id, un sale_order_id.
         target_dict será (group_key, account_move_line_section_or_note) -> 0.0
         """
         for line_obj in [previous_section, previous_note]:
@@ -62,133 +62,101 @@ class AccountMove(models.Model):
         )
 
     def lines_grouped_by_picking(self):
+
         self.ensure_one()
 
+        picking_lines_data = {}
+        sale_order_lines_data = {}
 
-        picking_lines_data = {}  # Para líneas agrupadas por picking
-        sale_order_lines_data = {}  # Para líneas (sin picking) agrupadas por SO
-        other_lines_data = {}  # Para líneas sin picking ni SO
-
-        no_picking_placeholder = self.env["stock.picking"].browse([])  # Para el picking en la estructura final
-        no_so_placeholder = self.env["sale.order"].browse([])  # Para el SO en la estructura final
-
-        sign = (
-            -1.0
-            if self.move_type == "out_refund"
-               and (
-                       not self.reversed_entry_id
-                       or self.reversed_entry_id.picking_ids != self.picking_ids
-               )
-            else 1.0
-        )
+        no_picking_placeholder = self.env["stock.picking"].browse([])
+        no_so_placeholder = self.env["sale.order"].browse([])
+        sign = -1.0 if self.move_type == 'out_refund' else 1.0
 
         so_to_picking_map = {p.sale_id: p for p in self.picking_ids if p.sale_id}
 
         previous_section = previous_note = False
-
-        sorted_invoice_lines = self._get_grouped_by_picking_sorted_lines()
+        sorted_invoice_lines = self.invoice_line_ids.sorted('sequence')
 
         for inv_line in sorted_invoice_lines:
-            if inv_line.display_type in ["line_section", "line_note"]:
+            if inv_line.display_type in ("line_section", "line_note"):
                 if inv_line.display_type == "line_section":
-                    if previous_section:
-                        pass
                     previous_section = inv_line
-                    previous_note = False  # Nueva sección limpia nota anterior
-                else:  # es line_note
-                    if previous_note:
-                        # Similar a la sección, si hay nota-nota sin producto intermedio.
-                        pass
+                    previous_note = False
+                else:
                     previous_note = inv_line
-                continue  # Continuar para que se asocien con la siguiente línea de producto
+                continue
 
-            # --- Inicio de la lógica de asignación de grupo para la línea de producto ---
-            associated_to_picking_group = False
-            if inv_line.move_line_ids:  # En Odoo 17, move_line_ids en account.move.line es M2M a stock.move
-                for move in inv_line.move_line_ids:  # move es un stock.move
-                    if move.picking_id:
-                        current_picking = move.picking_id
-                        # Procesar secciones/notas pendientes para este grupo de picking
-                        self._process_section_note_lines_grouped(previous_section, previous_note,
-                                                                 picking_lines_data, current_picking)
+            notes_processed_for_line = False
 
-                        key = (current_picking, inv_line)
-                        # Usamos la función _get_signed_quantity_done original que espera un stock.move
+            # PASO 1: CALCULAR Y AGRUPAR LA PARTE ENTREGADA ('DONE')
+            # Agrupamos los movimientos por su albarán 'done' para sumar correctamente.
+            done_pickings_moves = {}
+            if inv_line.move_line_ids:
+                for move in inv_line.move_line_ids:
+                    if move.picking_id and move.picking_id.state == 'done':
+                        if move.picking_id not in done_pickings_moves:
+                            done_pickings_moves[move.picking_id] = []
+                        done_pickings_moves[move.picking_id].append(move)
 
-#
-                        qty = self._get_quantity_from_move_for_picking(move, sign)
-                        picking_lines_data[key] = picking_lines_data.get(key, 0.0) + qty
-                        associated_to_picking_group = True
-                    # else: el move no tiene picking_id, se ignora para el grupo de picking.
-                    # Podría considerarse para SO si el move tiene SO y no picking.
+            total_delivered_qty_signed = 0.0
+            if done_pickings_moves:
+                for picking_record, moves_list in done_pickings_moves.items():
+                    # Si hay notas/secciones pendientes, se asocian al primer grupo que se crea.
+                    if not notes_processed_for_line:
+                        self._process_section_note_lines_grouped(
+                            previous_section, previous_note, picking_lines_data, picking_record
+                        )
+                        notes_processed_for_line = True
 
-            if not associated_to_picking_group:
-                if inv_line.sale_line_ids:
-                    # Asumir que todas las sale_line_ids de una inv_line son del mismo order_id,
-                    # o tomar el primero como representativo.
-                    current_sale_order = inv_line.sale_line_ids[0].order_id
-                    if current_sale_order:
-                        # Procesar secciones/notas pendientes para este grupo de SO
-                        self._process_section_note_lines_grouped(previous_section, previous_note,
-                                                                 sale_order_lines_data, current_sale_order)
+                    key = (picking_record, inv_line)
+                    qty_for_this_picking = 0.0
+                    for move in moves_list:
+                        qty_for_this_picking += self._get_quantity_from_move_for_picking(move, sign)
 
-                        key = (current_sale_order, inv_line)
-                        # La cantidad es la total de la línea de factura, ya que no se asoció a picking.
-                        qty = inv_line.quantity * sign
-                        sale_order_lines_data[key] = sale_order_lines_data.get(key, 0.0) + qty
-                    else:  # sale_line_ids pero sin order_id (raro) -> va a "Otros"
-                        self._process_section_note_lines_grouped(previous_section, previous_note, other_lines_data,
-                                                                 None)  # None como clave para "Otros"
-                        key = (None, inv_line)
-                        other_lines_data[key] = other_lines_data.get(key, 0.0) + (inv_line.quantity * sign)
-                else:  # Sin picking y sin SO -> va a "Otros"
-                    self._process_section_note_lines_grouped(previous_section, previous_note, other_lines_data,
-                                                             None)
-                    key = (None, inv_line)  # (None representa el grupo "Otros", inv_line es la línea de producto)
-                    other_lines_data[key] = other_lines_data.get(key, 0.0) + (inv_line.quantity * sign)
+                    picking_lines_data[key] = qty_for_this_picking
+                    total_delivered_qty_signed += qty_for_this_picking
 
-            # Limpiar secciones/notas pendientes ya que se han asociado a un grupo de producto.
-            previous_section = previous_note = False
+            # PASO 2: CALCULAR Y AGRUPAR LA PARTE PENDIENTE
+            signed_invoice_qty = inv_line.quantity * sign
 
-        # Estructurar la lista final para el reporte
+            # Usamos is_zero para evitar problemas de precisión con floats
+            pending_qty_signed = signed_invoice_qty - total_delivered_qty_signed
+
+            if not inv_line.currency_id.is_zero(pending_qty_signed):
+                # Hay una cantidad pendiente, la agrupamos por Pedido de Venta.
+                current_sale_order = inv_line.sale_line_ids[0].order_id if inv_line.sale_line_ids else None
+                if current_sale_order:
+                    # Si las notas no se asociaron antes, se asocian ahora.
+                    if not notes_processed_for_line:
+                        self._process_section_note_lines_grouped(
+                            previous_section, previous_note, sale_order_lines_data, current_sale_order
+                        )
+                        notes_processed_for_line = True
+
+                    key = (current_sale_order, inv_line)
+                    sale_order_lines_data[key] = pending_qty_signed
+                else:
+                    # Aquí iría la lógica para "Otros" si es necesario.
+                    pass
+
+            # Limpiamos las notas/secciones si fueron procesadas para esta línea.
+            if notes_processed_for_line:
+                previous_section = previous_note = False
+
+        # --- Construcción de la lista final (sin cambios) ---
         final_report_lines = []
-
-        # Líneas de Picking
-        for (picking_record, aml), qty in picking_lines_data.items():
-            # Si aml es una sección/nota, qty es 0.0 (seteado por _process_section_note_lines_grouped)
-            # Si aml es producto, qty es la calculada.
+        # Grupo "Entregado"
+        for (picking, aml), qty in picking_lines_data.items():
             final_report_lines.append({
-                "group_by": "picking",
-                "picking": picking_record,
-                "sale_order": picking_record.sale_id if picking_record else no_so_placeholder,
-                # SO del picking si existe
-                "line": aml,
-                "quantity": qty,
-                "is_last_section_notes": False,  # Secciones/notas aquí no son "trailing" globales
+                "group_by": "picking", "picking": picking,
+                "sale_order": picking.sale_id or no_so_placeholder,
+                "line": aml, "quantity": qty,
+            })
+        # Grupo "No Entregado"
+        for (so, aml), qty in sale_order_lines_data.items():
+            final_report_lines.append({
+                "group_by": "sale_order", "picking": so_to_picking_map.get(so, no_picking_placeholder),
+                "sale_order": so, "line": aml, "quantity": qty,
             })
 
-        # Líneas de Sale Order (sin picking)
-        for (so_record, aml), qty in sale_order_lines_data.items():
-            final_report_lines.append({
-                "group_by": "sale_order",
-                "picking": so_to_picking_map.get(so_record, no_picking_placeholder),
-                # Intenta encontrar un picking asociado
-                "sale_order": so_record,
-                "line": aml,
-                "quantity": qty,
-                "is_last_section_notes": False,
-            })
-
-        if previous_section:
-            final_report_lines.append({
-                "group_by": "other", "picking": no_picking_placeholder, "sale_order": no_so_placeholder,
-                "line": previous_section, "quantity": 0.0, "is_last_section_notes": True,
-            })
-        if previous_note:
-            final_report_lines.append({
-                "group_by": "other", "picking": no_picking_placeholder, "sale_order": no_so_placeholder,
-                "line": previous_note, "quantity": 0.0, "is_last_section_notes": True,
-            })
-
-        sorted_list = self._sort_grouped_lines_final(final_report_lines)
-        return sorted_list
+        return self._sort_grouped_lines_final(final_report_lines)
