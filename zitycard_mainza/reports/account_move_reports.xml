@@ -6,6 +6,7 @@
         <xpath expr="//span[@t-field='o.narration']/.." position="replace"/>
         <xpath expr="//span[@t-field='line.product_uom_id']" position="replace"/>
         <xpath expr="//div/p[@name='payment_communication']/.." position="replace"/>
+        <xpath expr="//span[@t-field='o.delivery_date']/.." position="replace"/>
     </template>
 
     <template id="report_account_invoice_grouped_inherit" inherit_id="account_invoice_report_grouped_by_picking.report_invoice_document">
