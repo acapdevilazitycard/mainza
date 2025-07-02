@@ -84,9 +84,13 @@
                             </t>
                         </strong>
                         <strong t-elif="data['group_by'] == 'sale_order' and data['sale_order']">
-
                             <span t-field="data['sale_order'].date_order" t-options="{'widget': 'date'}"/>
                             | <span t-field="data['sale_order'].name"/>
+                            <t t-if="o.ref">
+                                | <span t-field="o.ref"/>
+                            </t>
+                        </strong>
+                        <strong t-else="">
                             <t t-if="o.ref">
                                 | <span t-field="o.ref"/>
                             </t>

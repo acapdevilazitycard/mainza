@@ -67,6 +67,7 @@ class AccountMove(models.Model):
 
         picking_lines_data = {}
         sale_order_lines_data = {}
+        other_lines_data = {} #nuevo
 
         no_picking_placeholder = self.env["stock.picking"].browse([])
         no_so_placeholder = self.env["sale.order"].browse([])
@@ -112,7 +113,6 @@ class AccountMove(models.Model):
                     qty_for_this_picking = 0.0
                     for move in moves_list:
                         qty_for_this_picking += self._get_quantity_from_move_for_picking(move, sign)
-
                     picking_lines_data[key] = qty_for_this_picking
                     total_delivered_qty_signed += qty_for_this_picking
 
@@ -136,8 +136,13 @@ class AccountMove(models.Model):
                     key = (current_sale_order, inv_line)
                     sale_order_lines_data[key] = pending_qty_signed
                 else:
-                    # Aquí iría la lógica para "Otros" si es necesario.
-                    pass
+                    if not notes_processed_for_line:
+
+                        self._process_section_note_lines_grouped(
+                            previous_section, previous_note, other_lines_data, inv_line
+                        )
+                        notes_processed_for_line = True
+                    other_lines_data[(inv_line, inv_line)] = pending_qty_signed
 
             # Limpiamos las notas/secciones si fueron procesadas para esta línea.
             if notes_processed_for_line:
@@ -157,6 +162,17 @@ class AccountMove(models.Model):
             final_report_lines.append({
                 "group_by": "sale_order", "picking": so_to_picking_map.get(so, no_picking_placeholder),
                 "sale_order": so, "line": aml, "quantity": qty,
+            })
+
+        for (group_key, aml), qty in other_lines_data.items():
+            line_to_add = aml if aml.display_type not in ('line_section', 'line_note') else group_key
+
+            final_report_lines.append({
+                "group_by": "other",  # Grupo "Other"
+                "picking": no_picking_placeholder,
+                "sale_order": no_so_placeholder,
+                "line": line_to_add,
+                "quantity": qty,
             })
 
         return self._sort_grouped_lines_final(final_report_lines)
