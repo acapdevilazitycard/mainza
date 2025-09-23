@@ -1,0 +1,16 @@
+<odoo>
+    <template id="robots_inherit" inherit_id="website.robots">
+    <xpath expr="//t[@t-else='']" position="replace">
+        <t t-else="">
+
+
+            ##############
+            #   custom   #
+            ##############
+
+            <t t-out="request.website.sudo().robots_txt" />
+        </t>
+    </xpath>
+</template>
+
+</odoo>
