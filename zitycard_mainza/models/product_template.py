@@ -4,6 +4,11 @@ from odoo import api, fields, models
 class ProductTemplate(models.Model):
     _inherit = 'product.template'
 
+    website_noindex = fields.Boolean(
+        default=False,
+        help='Si está activado, el producto será visible en la web pero invisible para motores de búsqueda (Google, Bing, etc.)'
+    )
+
     def _get_additionnal_combination_info(self, product_or_template, quantity, date, website):
         res = super()._get_additionnal_combination_info(product_or_template, quantity, date, website)
 
