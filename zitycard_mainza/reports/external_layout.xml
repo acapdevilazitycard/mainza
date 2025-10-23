@@ -8,11 +8,12 @@
                 </div>
 
                 <div class="last-page" style="width: 100%; max-width: 100%;">
-                    <div style="width: 100%; white-space: normal;">
+                    <div style="width: 100%; white-space: normal; font-size: 12px;">
                         Informarle que tratamos la información que nos facilita con el fin de realizar pedidos y gestionar la facturación de los productos y servicios contratados.
-                        Puede consultar toda la información sobre el tratamiento de sus datos y los derechos que le asisten en la Política de Privacidad de nuestra web
-                        <a href="http://www.variadores.es" target="_blank">www.variadores.es</a>
-                        Inscrita en el R.M. de Zaragoza, Tomo 4253, Folio 32, Hoja: Z 62027, Insc. 1
+                        <br/>
+                        Puede consultar toda la información sobre el tratamiento de sus datos y los derechos que le asisten en la Política de Privacidad de nuestra web <a href="http://www.variaelectric.es" target="_blank">www.variaelectric.es</a>
+                        <br/>
+                        Inscrita en el registro mercantil de Zaragoza, Inscripción 1ª Hoja
                     </div>
                     <div t-if="report_type == 'pdf' and display_name_in_footer" class="text-muted" style="width: 100%;">
                         <span t-out="o.name">(document name)</span>
