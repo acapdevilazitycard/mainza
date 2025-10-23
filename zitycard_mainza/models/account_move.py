@@ -148,6 +148,11 @@ class AccountMove(models.Model):
             if notes_processed_for_line:
                 previous_section = previous_note = False
 
+        if previous_section:
+            other_lines_data[(previous_section, previous_section)] = 0.0
+        if previous_note:
+            other_lines_data[(previous_note, previous_note)] = 0.0
+
         # --- Construcción de la lista final (sin cambios) ---
         final_report_lines = []
         # Grupo "Entregado"
