@@ -43,14 +43,13 @@ class AccountMove(models.Model):
         return move.product_uom_qty * sign
 
     def _process_section_note_lines_grouped(
-            self, previous_section, previous_note, target_dict, group_key
+            self, pending_lines, target_dict, group_key
     ):
         """
-        Procesa secciones y notas, añadiéndolas a un diccionario target_dict bajo una group_key.
-        group_key puede ser un picking_id, un sale_order_id.
-        target_dict será (group_key, account_move_line_section_or_note) -> 0.0
+        Procesa una lista de secciones y notas pendientes, añadiéndolas a un
+        diccionario target_dict bajo una group_key.
         """
-        for line_obj in [previous_section, previous_note]:
+        for line_obj in pending_lines:
             if line_obj:
                 key_for_section_note = (group_key, line_obj)
                 target_dict.setdefault(key_for_section_note, 0.0)  # La cantidad es 0 para secciones/notas
@@ -64,7 +63,6 @@ class AccountMove(models.Model):
     def lines_grouped_by_picking(self):
 
         self.ensure_one()
-
         picking_lines_data = {}
         sale_order_lines_data = {}
         other_lines_data = {} #nuevo
@@ -75,21 +73,14 @@ class AccountMove(models.Model):
 
         so_to_picking_map = {p.sale_id: p for p in self.picking_ids if p.sale_id}
 
-        previous_section = previous_note = False
+        pending_notes_and_sections = []
         sorted_invoice_lines = self.invoice_line_ids.sorted('sequence')
 
         for inv_line in sorted_invoice_lines:
             if inv_line.display_type in ("line_section", "line_note"):
-                if inv_line.display_type == "line_section":
-                    previous_section = inv_line
-                    previous_note = False
-                else:
-                    previous_note = inv_line
+                pending_notes_and_sections.append(inv_line)
                 continue
 
-            notes_processed_for_line = False
-
-            # PASO 1: CALCULAR Y AGRUPAR LA PARTE ENTREGADA ('DONE')
             # Agrupamos los movimientos por su albarán 'done' para sumar correctamente.
             done_pickings_moves = {}
             if inv_line.move_line_ids:
@@ -103,11 +94,10 @@ class AccountMove(models.Model):
             if done_pickings_moves:
                 for picking_record, moves_list in done_pickings_moves.items():
                     # Si hay notas/secciones pendientes, se asocian al primer grupo que se crea.
-                    if not notes_processed_for_line:
+                    if pending_notes_and_sections:
                         self._process_section_note_lines_grouped(
-                            previous_section, previous_note, picking_lines_data, picking_record
+                            pending_notes_and_sections, picking_lines_data, picking_record
                         )
-                        notes_processed_for_line = True
 
                     key = (picking_record, inv_line)
                     qty_for_this_picking = 0.0
@@ -116,44 +106,35 @@ class AccountMove(models.Model):
                     picking_lines_data[key] = qty_for_this_picking
                     total_delivered_qty_signed += qty_for_this_picking
 
-            # PASO 2: CALCULAR Y AGRUPAR LA PARTE PENDIENTE
             signed_invoice_qty = inv_line.quantity * sign
 
-            # Usamos is_zero para evitar problemas de precisión con floats
             pending_qty_signed = signed_invoice_qty - total_delivered_qty_signed
 
             if not inv_line.currency_id.is_zero(pending_qty_signed):
-                # Hay una cantidad pendiente, la agrupamos por Pedido de Venta.
                 current_sale_order = inv_line.sale_line_ids[0].order_id if inv_line.sale_line_ids else None
                 if current_sale_order:
-                    # Si las notas no se asociaron antes, se asocian ahora.
-                    if not notes_processed_for_line:
+                    if pending_notes_and_sections:
                         self._process_section_note_lines_grouped(
-                            previous_section, previous_note, sale_order_lines_data, current_sale_order
+                            pending_notes_and_sections, sale_order_lines_data, current_sale_order
                         )
-                        notes_processed_for_line = True
 
                     key = (current_sale_order, inv_line)
                     sale_order_lines_data[key] = pending_qty_signed
                 else:
-                    if not notes_processed_for_line:
-
+                    if pending_notes_and_sections:
                         self._process_section_note_lines_grouped(
-                            previous_section, previous_note, other_lines_data, inv_line
+                            pending_notes_and_sections, other_lines_data, inv_line
                         )
-                        notes_processed_for_line = True
                     other_lines_data[(inv_line, inv_line)] = pending_qty_signed
 
-            # Limpiamos las notas/secciones si fueron procesadas para esta línea.
-            if notes_processed_for_line:
-                previous_section = previous_note = False
+            if pending_notes_and_sections:
+                pending_notes_and_sections = []
 
-        if previous_section:
-            other_lines_data[(previous_section, previous_section)] = 0.0
-        if previous_note:
-            other_lines_data[(previous_note, previous_note)] = 0.0
+        # Procesamos cualquier nota/sección que haya quedado al final
+        if pending_notes_and_sections:
+            for final_note_or_section in pending_notes_and_sections:
+                other_lines_data[(final_note_or_section, final_note_or_section)] = 0.0
 
-        # --- Construcción de la lista final (sin cambios) ---
         final_report_lines = []
         # Grupo "Entregado"
         for (picking, aml), qty in picking_lines_data.items():
@@ -173,7 +154,7 @@ class AccountMove(models.Model):
             line_to_add = aml if aml.display_type not in ('line_section', 'line_note') else group_key
 
             final_report_lines.append({
-                "group_by": "other",  # Grupo "Other"
+                "group_by": "other",
                 "picking": no_picking_placeholder,
                 "sale_order": no_so_placeholder,
                 "line": line_to_add,
