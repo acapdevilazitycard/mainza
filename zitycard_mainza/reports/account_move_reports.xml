@@ -68,44 +68,43 @@
             </t>
 
             <t t-if="show_header">
-                <tr><!--
-                    <td t-att-colspan="o._get_report_line_colspan()">-->
+                <tr>
                     <td>
                         <strong t-if="data['group_by'] == 'picking' and data['picking']">
                             <span t-field="data['picking'].date_done" t-options="{'widget': 'date'}" t-if="data['picking'].date_done"/>
                             <span t-elif="data['picking'].date" t-field="data['picking'].date" t-options="{'widget': 'date'}"/>
-                            <span t-else="" />
                             | <span t-field="data['picking'].name"/>
                             <t t-if="data['picking'].sale_id">
                                 | <span t-field="data['picking'].sale_id.name"/>
                             </t>
-                            <t t-if="o.ref">
+
+                            <t t-if="data['picking'].sale_id and data['picking'].sale_id.client_order_ref">
+                                | <span t-field="data['picking'].sale_id.client_order_ref"/>
+                            </t> <!--
+                            <t t-elif="o.ref">
                                 | <span t-field="o.ref"/>
-                            </t>
+                            </t> -->
                         </strong>
+
                         <strong t-elif="data['group_by'] == 'sale_order' and data['sale_order']">
                             <span t-field="data['sale_order'].date_order" t-options="{'widget': 'date'}"/>
                             | <span t-field="data['sale_order'].name"/>
-                            <t t-if="o.ref">
+
+                            <t t-if="data['sale_order'].client_order_ref">
+                                | <span t-field="data['sale_order'].client_order_ref"/>
+                            </t><!--
+                            <t t-elif="o.ref">
                                 | <span t-field="o.ref"/>
-                            </t>
+                            </t> -->
                         </strong>
-                        <strong t-else="">
-                            <t t-if="o.ref">
-                                | <span t-field="o.ref"/>
-                            </t>
-                        </strong>
+
+                        <strong t-else="" />
                     </td>
-                        <td t-if="display_discount" />
-                        <td />
-                        <td />
-                        <td />
                 </tr>
             </t>
         </xpath>
     <xpath expr="//t[@t-set='subtotal']" position="after">
         <t t-set="last_sale_order" t-value="False" />
     </xpath>
-
     </template>
 </odoo>
