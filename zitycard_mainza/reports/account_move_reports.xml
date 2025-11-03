@@ -99,6 +99,9 @@
                         </strong>
 
                         <strong t-else="" />
+                        <td/>
+                        <td/>
+                        <td/>
                     </td>
                 </tr>
             </t>
